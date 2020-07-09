@@ -1,2 +1,6 @@
-# whatsapp-downloader-group
-Um bot que vai baixar as imagens, documentos e gravar em log todas as conversas do whatsapp de determinado grupo.
+# Whatsapp group observer
+A bot that will download the images, documents and log all WhatsApp conversations of a certain group.
+
+## Tecnologias Utilizadas
+- NodeJS
+- [wa-automate-nodejs](https://github.com/open-wa/wa-automate-nodejs)
