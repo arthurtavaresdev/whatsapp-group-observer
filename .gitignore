@@ -103,7 +103,7 @@ dist
 # TernJS port file
 .tern-port
 
-tmp/
-temp/
+# tmp/
+# temp/
 session.data.json
 yarn.lock
