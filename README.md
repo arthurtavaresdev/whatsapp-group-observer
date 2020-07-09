@@ -15,6 +15,6 @@ Then, run the command:
 ```
 
 ## Technologies Used
-- NodeJS
+- NodeJS (Development version: 12.18.1)
 - [wa-automate-nodejs](https://github.com/open-wa/wa-automate-nodejs)
 
