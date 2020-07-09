@@ -1,0 +1,17 @@
+{
+  "name": "whatsapp-group-observer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/index.js"
+  },
+  "repository": "https://github.com/arthurabreu00/whatsapp-group-observer.git",
+  "author": "Arthur Tavares <arthurabreu00@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@open-wa/wa-automate": "^1.9.96",
+    "dotenv": "^8.2.0",
+    "mime-types": "^2.1.27",
+    "uuid": "^8.2.0"
+  }
+}
