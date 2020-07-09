@@ -36,18 +36,16 @@ async function createLogFromChat(client,chat){
     messages.forEach(async (message)=>{
         if(message.type === 'chat'){
             try{
-                console.log('Escrita do log iniciada!');
                 await fs.appendFile(file,message.body);
             }catch(e){
-                console.log('Escrita do log, ocorreu um erro!')
                 console.error(e);
-            }finally{
-                console.log('Escrita do log finalizada!')
             }
         }else{
             transformToImageOrDocument(message);
         }
     });
+
+    console.log('Download the images and log the finished files. Make sure everything went well!');
 }
 
 /**
