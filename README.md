@@ -7,7 +7,7 @@ A bot that will download the images, documents and log all WhatsApp conversation
 ```
 
 ## Usage
-Put the group name of your whatsapp in the .env file.
+Put the group name of your whatsapp in the <b>.env<b> file.
 
 Then, run the command:
 ```bash
