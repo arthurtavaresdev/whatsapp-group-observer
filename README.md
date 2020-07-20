@@ -1,4 +1,4 @@
-# Whatsapp group observer
+# Whatsapp group observer (In progress)
 A bot that will download the images, documents and log all WhatsApp conversations of a certain group.
 
 ## Installation
