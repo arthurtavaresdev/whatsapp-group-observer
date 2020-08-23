@@ -1,98 +1,87 @@
-const wa = require('@open-wa/wa-automate');
-const path = require('path');
-const fs = require('fs').promises;
-const mime = require('mime-types');
-const uuid = require('uuid').v4;
+const wa = require("@open-wa/wa-automate");
+const path = require("path");
+const fs = require("fs").promises;
+const mime = require("mime-types");
 
-require('dotenv').config();
+const isValidateBase64 = require("./utils/isValidateBase64");
+const gdrive = require("./services/gdrive");
 
-wa.create().then(client => start(client));
+require("dotenv").config();
 
+wa.create().then((client) => start(client));
 
 /**
- * 
- * @param {wa.Client} client 
+ *
+ * @param {wa.Client} client
  */
 async function start(client) {
-    const groups  = await client.getAllGroups();
-    const groupSpecify  = groups.filter(group => group.formattedTitle.toUpperCase() === process.env.GROUP_NAME.toUpperCase())[0];
-
-    await createLogFromChat(client, groupSpecify);
-
-}
-
-/**
- * 
- * @param {wa.Client} client 
- * @param {import('@open-wa/wa-automate').Chat} chat 
- */
-async function createLogFromChat(client,chat){
-    const file = path.resolve(__dirname,'..','tmp','messages.log');
-
-    // Clear old content MSG.
-    await fs.truncate(file);
-
-    const messages = await client.getAllMessagesInChat(chat.contact.id);
-    messages.forEach(async (message)=>{
-        if(message.type === 'chat'){
-            try{
-                await fs.appendFile(file,message.body);
-            }catch(e){
-                console.error(e);
-            }
-        }else{
-            transformToImageOrDocument(message);
-        }
-    });
-
-    console.log('Download the images and log the finished files. Make sure everything went well!');
-}
-
-/**
- * 
- * @param {import('@open-wa/wa-automate').Message} message 
- */
-async function transformToImageOrDocument(message){
-    if(isValidateBase64(message.body)){
-        const extension = mime.extension(message.mimetype);
-        await fs.writeFile(path.resolve(__dirname,'..','tmp',`${uuid()}.${extension}`),  message.body, {encoding: 'base64'});
-    }
-}
-
-/**
- * 
- * @param {String} str 
- */
-function isValidateBase64(str){
-      const notBase64 = /[^A-Z0-9+\/=]/i;
-      assertString(str);
-
-      const len = str.length;
-      if (!len || len % 4 !== 0 || notBase64.test(str)) {
-        return false;
-      }
-      const firstPaddingChar = str.indexOf('=');
-      return firstPaddingChar === -1 ||
-        firstPaddingChar === len - 1 ||
-        (firstPaddingChar === len - 2 && str[len - 1] === '=');
-    
-}
-
-function assertString(input) {
-    const isString = (typeof input === 'string' || input instanceof String);
-  
-    if (!isString) {
-      let invalidType;
-      if (input === null) {
-        invalidType = 'null';
+  /**
+   * @param {import("@open-wa/wa-automate").Message}
+   */
+  client.onMessage(async (message) => {
+    if (
+      message.chat.name.toUpperCase() === process.env.GROUP_NAME.toUpperCase()
+    ) {
+      if (message.type === "chat") {
+        await createLogFromChat(message);
       } else {
-        invalidType = typeof input;
-        if (invalidType === 'object' && input.constructor && input.constructor.hasOwnProperty('name')) {
-          invalidType = input.constructor.name;
-        } else {
-          invalidType = `a ${invalidType}`;
-        }
+        await transform(client, message);
       }
-      throw new TypeError(`Expected string but received ${invalidType}.`);
     }
+  });
+}
+
+/**
+ * @param {import('@open-wa/wa-automate').Client} client
+ * @param {import('@open-wa/wa-automate').Chat} chat
+ */
+async function createLogFromChat(message) {
+  const file = path.resolve(__dirname, "..", "tmp", "messages.log");
+
+  try {
+    await fs.appendFile(file, message.body + "\n");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/**
+ *
+ * @param {import('@open-wa/wa-automate').Message} message
+ */
+async function transform(client, message) {
+  if (isValidateBase64(message.body)) {
+    const extension = mime.extension(message.mimetype);
+    const filename = `${message.t}.${extension}`;
+    const filePath = path.resolve(__dirname, "..", "tmp", filename);
+
+    if (message.mimetype) {
+      const mediaData = await wa.decryptMedia(message);
+
+      try {
+        await fs.writeFile(filePath, mediaData);
+
+        fs.access("credentials.json")
+          .then(() => {
+            gdrive.createFile(filename, filePath, message.mimetype, (id) => {
+              console.log("Enviado com suceso! - ID: " + id);
+            });
+          })
+          .catch((e) => {});
+
+        await client.reply(
+          message.chatId,
+          "✅ Imagem salva com sucesso!",
+          message.id
+        );
+      } catch (e) {
+        console.error(e);
+        await client.reply(
+          message.chatId,
+          "❌ Ocorreu, um erro ao salvar imagem",
+          message.id
+        );
+      }
+    }
+  }
 }

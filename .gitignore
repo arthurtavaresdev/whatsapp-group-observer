@@ -107,3 +107,6 @@ tmp/
 temp/
 session.data.json
 yarn.lock
+
+credentials.json
+token.json

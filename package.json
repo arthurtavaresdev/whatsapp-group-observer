@@ -10,7 +10,9 @@
   "license": "MIT",
   "dependencies": {
     "@open-wa/wa-automate": "^1.9.96",
+    "base64topdf": "^1.1.8",
     "dotenv": "^8.2.0",
+    "googleapis": "39",
     "mime-types": "^2.1.27",
     "uuid": "^8.2.0"
   }
